@@ -19,7 +19,7 @@ dnf5 install -y \
     dsearch \
     matugen \
     cliphist \
-    ghostty \
+    alacritty \
     nautilus \
     polkit-gnome \
     wl-clipboard
