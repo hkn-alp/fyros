@@ -29,4 +29,4 @@ dnf5 -y copr disable avengemedia/dms
 
 ### 4. Enable System Services
 # This ensures your login screen automatically starts when you boot
-systemctl enable dank-greeter.service
+systemctl enable greetd.service
