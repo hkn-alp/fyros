@@ -2,23 +2,34 @@
 
 set -ouex pipefail
 
-### Install packages
+### 1. Enable Required COPR Repositories
+# This adds the custom repositories for Niri, DMS, and Ghostty
+dnf5 -y copr enable avengemedia/danklinux
+dnf5 -y copr enable avengemedia/dms
+dnf5 -y copr enable mkody/ghostty
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+### 2. Install the Complete Ecosystem
+# This installs the Wayland compositor, the shell, the terminal, and essentials
+dnf5 install -y \
+    niri \
+    dms \
+    quickshell \
+    dank-greeter \
+    dgop \
+    dsearch \
+    matugen \
+    cliphist \
+    ghostty \
+    nautilus \
+    polkit-gnome \
+    wl-clipboard
 
-# this installs a package from fedora repos
-dnf5 install -y tmux 
+### 3. Disable COPRs
+# This is a best practice so they don't cause conflicts during future updates
+dnf5 -y copr disable avengemedia/danklinux
+dnf5 -y copr disable avengemedia/dms
+dnf5 -y copr disable mkody/ghostty
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
-
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+### 4. Enable System Services
+# This ensures your login screen automatically starts when you boot
+systemctl enable dank-greeter.service
