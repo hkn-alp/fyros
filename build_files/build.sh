@@ -13,15 +13,14 @@ dnf5 install -y \
     niri \
     dms \
     quickshell \
-    dank-greeter \
+    dms-greeter \
     dgop \
     dsearch \
     matugen \
     cliphist \
     alacritty \
     nautilus \
-    polkit-gnome \
-    wl-clipboard
+    lxqt-policykit
 
 ### 3. Disable COPRs
 # This is a best practice so they don't cause conflicts during future updates
