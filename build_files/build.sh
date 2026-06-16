@@ -10,10 +10,9 @@ dnf5 -y copr enable scottames/ghostty
 
 ### 2. Install the Complete Ecosystem
 # This installs the Wayland compositor, the shell, the terminal, and essentials
-dnf5 install -y \
+dnf5 install -y--allowerasing \
     niri \
     dms \
-    quickshell \
     dms-greeter \
     dgop \
     dsearch \
@@ -24,12 +23,17 @@ dnf5 install -y \
     lxqt-policykit \
     dcal
 
-### 3. Disable COPRs
+### 3. Install Himalaya CLI (Direct Binary)
+# Downloading the pre-compiled binary directly to avoid F44 COPR conflicts
+curl -Lo /usr/bin/himalaya https://github.com/pimalaya/himalaya/releases/latest/download/himalaya-linux-amd64
+chmod +x /usr/bin/himalaya
+
+### 4. Disable COPRs
 # This is a best practice so they don't cause conflicts during future updates
 dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 
-### 4. Enable System Services
+### 5. Enable System Services
 # This ensures your login screen automatically starts when you boot
 systemctl enable greetd.service
