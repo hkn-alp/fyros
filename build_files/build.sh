@@ -10,7 +10,7 @@ dnf5 -y copr enable scottames/ghostty
 
 ### 2. Install the Complete Ecosystem
 # This installs the Wayland compositor, the shell, the terminal, and essentials
-dnf5 install -y--allowerasing \
+dnf5 install -y --allowerasing \
     niri \
     dms \
     dms-greeter \
