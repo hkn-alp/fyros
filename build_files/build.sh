@@ -48,10 +48,10 @@ cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
 
 ### 7. Configure DMS Greeter as the Default Login Canvas
 # Create the configuration directory
-mkdir -p /usr/etc/greetd
+mkdir -p /etc/greetd
 
 # Point greetd to dms-greeter using the niri canvas
-cat << 'EOF' > /usr/etc/greetd/config.toml
+cat << 'EOF' > /etc/greetd/config.toml
 [terminal]
 vt = 1
 
