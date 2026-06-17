@@ -79,6 +79,9 @@ systemctl enable flatpak-preinstall.service
 ### 6. Enable Core System Services
 systemctl enable greetd.service
 
+# Tell the OS to auto-start DankMaterialShell via systemd for all future users
+systemctl --global enable dms.service
+
 ### 7. Bake in Custom User Dotfiles
 # Safely copies all custom layouts and configs from your GitHub repo into the OS skeleton
 mkdir -p /etc/skel/.config
