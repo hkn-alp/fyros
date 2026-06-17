@@ -18,11 +18,9 @@ dnf5 install -y --allowerasing \
     cliphist \
     ghostty \
     nautilus \
-    betterbird \
     gnome-network-displays \
     network-manager-applet \
     xdg-desktop-portal-gnome \
-    xdg-desktop-portal-gtk \
     cava \
     qt6ct \
     qt6-qtmultimedia \
@@ -46,8 +44,8 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
-### 5. Flatpak First-Boot Pre-installer (The Bluefin Secret Trick)
-# Silently installs Valent from the nightly repo the moment the host machine gets internet
+### 5. Flatpak First-Boot Pre-installer
+# Silently installs Flatpaks the moment the host machine gets internet
 mkdir -p /usr/lib/systemd/system/
 
 cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
@@ -64,8 +62,9 @@ ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists valent https:/
 # 2. Add the standard Flathub remote for normal apps
 ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-# 3. Install Valent
+# 3. Install Apps
 ExecStart=/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
+ExecStart=/usr/bin/flatpak install --system -y flathub dev.zed.Zed
 
 # 4. Disable this service so it doesn't try to reinstall on future reboots
 ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
@@ -87,10 +86,8 @@ cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
 
 ### 8. Configure DMS Greeter as the Default Login Canvas
-# FIXED: Written to /etc to ensure the bootc linter successfully passes!
 mkdir -p /etc/greetd
 
-# Point greetd to dms-greeter using the niri canvas
 cat << 'EOF' > /etc/greetd/config.toml
 [terminal]
 vt = 1
@@ -114,3 +111,8 @@ cat << 'EOF' > /usr/lib/systemd/system/greetd.service.d/tmpfiles-wait.conf
 After=systemd-tmpfiles-setup.service
 Requires=systemd-tmpfiles-setup.service
 EOF
+
+### 9. Image Size Optimization
+# Clears all downloaded DNF5 package data, saved info, and temp caches
+dnf5 clean all
+rm -rf /var/cache/* /tmp/*
