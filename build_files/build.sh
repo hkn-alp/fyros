@@ -50,3 +50,25 @@ systemctl enable greetd.service
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
+
+### 8. Configure DMS Greeter as the Default Login
+mkdir -p /etc/greetd
+
+# Create a minimal Niri layout specifically for the login screen canvas
+cat << 'EOF' > /etc/greetd/niri-greeter.kdl
+layout {
+    default-column-width { proportion 1.0; }
+    focus-ring { off }
+    border { off }
+}
+EOF
+
+# Tell greetd to launch dms-greeter using the Niri canvas we just created
+cat << 'EOF' > /etc/greetd/config.toml
+[terminal]
+vt = 1
+
+[default_session]
+command = "dms-greeter --command niri -C /etc/greetd/niri-greeter.kdl"
+user = "greeter"
+EOF
