@@ -9,7 +9,7 @@ dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
 
 ### 2. Install the Complete Ecosystem
-# This installs the Wayland compositor, the shell, the terminal, and essentials
+# Added Zsh, Starship, and the Fish-like plugins to the install list
 dnf5 install -y --allowerasing \
     niri \
     dms \
@@ -21,7 +21,11 @@ dnf5 install -y --allowerasing \
     ghostty \
     nautilus \
     lxqt-policykit \
-    dcal
+    dcal \
+    zsh \
+    starship \
+    zsh-autosuggestions \
+    zsh-syntax-highlighting
 
 ### 3. Install Himalaya CLI (Direct Binary)
 # Downloading the pre-compiled binary directly to avoid F44 COPR conflicts
@@ -42,3 +46,5 @@ systemctl enable greetd.service
 # This creates the system skeleton folder and copies your configurations into it
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/
+# Also copy hidden files in the root of skel (like .zshrc)
+cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ || true

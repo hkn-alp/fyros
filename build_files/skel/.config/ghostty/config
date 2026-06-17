@@ -9,3 +9,6 @@ adjust-cell-height = 10%
 
 # 3. DMS Theming: Load the Matugen output
 config-file = dms-colors.conf
+
+# 4. Force Ghostty to launch Zsh instead of default Bash
+command = /usr/bin/zsh
