@@ -6,9 +6,9 @@ set -ouex pipefail
 dnf5 -y copr enable avengemedia/danklinux
 dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
+dnf5 -y copr enable atim/starship
 
 ### 2. Install the Complete Ecosystem
-# Added qt6-multimedia for system UI sounds
 dnf5 install -y --allowerasing \
     niri \
     dms \
@@ -17,7 +17,7 @@ dnf5 install -y --allowerasing \
     dsearch \
     matugen \
     cliphist \
-    qt6-multimedia \
+    qt6-qtmultimedia \
     ghostty \
     nautilus \
     lxqt-policykit \
@@ -31,8 +31,7 @@ dnf5 install -y --allowerasing \
 curl -Lo /usr/bin/himalaya https://github.com/pimalaya/himalaya/releases/latest/download/himalaya-linux-amd64
 chmod +x /usr/bin/himalaya
 
-### 4. Fix Missing DMS Configurations (COPR Bug Workaround)
-# The package is missing the default layouts. We grab them directly from GitHub.
+### 4. DMS Configurations
 git clone https://github.com/AvengeMedia/DankMaterialShell.git /tmp/dms-source
 mkdir -p /etc/skel/.config
 cp -r /tmp/dms-source/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
@@ -42,6 +41,7 @@ rm -rf /tmp/dms-source
 dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
+dnf5 -y copr disable atim/starship
 
 ### 6. Enable System Services
 systemctl enable greetd.service
