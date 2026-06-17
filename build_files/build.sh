@@ -16,9 +16,18 @@ dnf5 install -y --allowerasing \
     dsearch \
     matugen \
     cliphist \
-    qt6-qtmultimedia \
     ghostty \
     nautilus \
+    betterbird \
+    gnome-network-displays \
+    network-manager-applet \
+    xdg-desktop-portal-gnome \
+    xdg-desktop-portal-gtk \
+    cava \
+    qt6ct \
+    qt6-qtmultimedia \
+    brightnessctl \
+    playerctl \
     lxqt-policykit \
     dcal \
     zsh \
@@ -37,17 +46,48 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
-### 5. Enable System Services
+### 5. Flatpak First-Boot Pre-installer (The Bluefin Secret Trick)
+# Silently installs Valent from the nightly repo the moment the host machine gets internet
+mkdir -p /usr/lib/systemd/system/
+
+cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
+[Unit]
+Description=Install Custom Flatpaks on First Boot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# 1. Add the Flathub Nightly remote specifically for Valent
+ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
+
+# 2. Add the standard Flathub remote for normal apps
+ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# 3. Install Valent
+ExecStart=/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
+
+# 4. Disable this service so it doesn't try to reinstall on future reboots
+ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable the first-boot pre-installer
+systemctl enable flatpak-preinstall.service
+
+### 6. Enable Core System Services
 systemctl enable greetd.service
 
-### 6. Bake in Custom User Dotfiles
+### 7. Bake in Custom User Dotfiles
 # Safely copies all custom layouts and configs from your GitHub repo into the OS skeleton
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
 
-### 7. Configure DMS Greeter as the Default Login Canvas
-# Create the configuration directory
+### 8. Configure DMS Greeter as the Default Login Canvas
+# FIXED: Written to /etc to ensure the bootc linter successfully passes!
 mkdir -p /etc/greetd
 
 # Point greetd to dms-greeter using the niri canvas
