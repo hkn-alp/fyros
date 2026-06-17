@@ -37,3 +37,8 @@ dnf5 -y copr disable scottames/ghostty
 ### 5. Enable System Services
 # This ensures your login screen automatically starts when you boot
 systemctl enable greetd.service
+
+### 6. Bake in Default Dotfiles
+# This creates the system skeleton folder and copies your configurations into it
+mkdir -p /etc/skel/.config
+cp -a /ctx/skel/.config/* /etc/skel/.config/

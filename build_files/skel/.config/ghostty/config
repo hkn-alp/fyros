@@ -1,0 +1,11 @@
+# 1. Niri Synergy: Strip all GTK headers and borders
+window-decoration = false
+gtk-titlebar = false
+
+# 2. Typography: Enable advanced font features for scripting
+font-family = "JetBrains Mono"
+font-size = 12
+adjust-cell-height = 10%
+
+# 3. DMS Theming: Load the Matugen output
+config-file = dms-colors.conf
