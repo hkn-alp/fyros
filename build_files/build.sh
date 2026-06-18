@@ -13,6 +13,7 @@ dnf5 install -y --allowerasing \
     dms \
     dms-greeter \
     dgop \
+    accountsservice \
     dsearch \
     matugen \
     cliphist \
