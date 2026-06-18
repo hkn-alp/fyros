@@ -72,8 +72,15 @@ systemctl enable flatpak-preinstall.service
 
 ### 6. Enable Core System Services
 systemctl enable greetd.service
-systemctl --global enable add-wants niri.service dms.service
+systemctl --global enable dms.service
 systemctl enable power-profiles-daemon.service
+
+# Lock DMS so it ONLY runs inside Niri (Prevents conflicts with GNOME/KDE)
+mkdir -p /usr/lib/systemd/user/dms.service.d
+cat << 'EOF' > /usr/lib/systemd/user/dms.service.d/niri-only.conf
+[Unit]
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+EOF
 
 ### 7. Bake in Custom User Dotfiles
 mkdir -p /etc/skel/.config
