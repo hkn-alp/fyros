@@ -7,7 +7,7 @@ dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable atim/starship
 
-### 2. Install the Complete Ecosystem
+### 2. Install the Complete Ecosystem (Added missing System Check packages!)
 dnf5 install -y --allowerasing \
     niri \
     dms \
@@ -31,21 +31,22 @@ dnf5 install -y --allowerasing \
     zsh \
     starship \
     zsh-autosuggestions \
-    zsh-syntax-highlighting
+    zsh-syntax-highlighting \
+    power-profiles-daemon \
+    cups-pk-helper \
+    kf6-kimageformats
 
 ### 3. Install Himalaya CLI (Direct Binary)
 curl -Lo /usr/bin/himalaya https://github.com/pimalaya/himalaya/releases/latest/download/himalaya-linux-amd64
 chmod +x /usr/bin/himalaya
 
 ### 4. Disable COPRs
-# Disabled to prevent conflicts during future automatic system updates
 dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
 ### 5. Flatpak First-Boot Pre-installer
-# Silently installs Flatpaks the moment the host machine gets internet
 mkdir -p /usr/lib/systemd/system/
 
 cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
@@ -56,39 +57,52 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-# 1. Add the Flathub Nightly remote specifically for Valent
 ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
-
-# 2. Add the standard Flathub remote for normal apps
 ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
-# 3. Install Apps
 ExecStart=/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
 ExecStart=/usr/bin/flatpak install --system -y flathub dev.zed.Zed
-
-# 4. Disable this service so it doesn't try to reinstall on future reboots
 ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Enable the first-boot pre-installer
 systemctl enable flatpak-preinstall.service
 
 ### 6. Enable Core System Services
 systemctl enable greetd.service
-
-# Tell the OS to auto-start DankMaterialShell via systemd for all future users
 systemctl --global enable dms.service
 
 ### 7. Bake in Custom User Dotfiles
-# Safely copies all custom layouts and configs from your GitHub repo into the OS skeleton
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
 
-### 8. Configure DMS Greeter as the Default Login Canvas
+#### 8. Existing User Dotfile Injector (The Magic Fix!)
+# Safely copies all dotfiles to existing accounts without overwriting user data
+mkdir -p /usr/lib/systemd/user/
+cat << 'EOF' > /usr/lib/systemd/user/fyros-dotfiles.service
+[Unit]
+Description=Inject All Fyros Dotfiles for Existing Users
+# Check if our custom injection has ever run for this user before
+ConditionPathExists=!%h/.local/state/fyros-dotfiles-injected
+
+[Service]
+Type=oneshot
+# 1. Create the state directory just in case it doesn't exist
+ExecStartPre=/usr/bin/mkdir -p %h/.local/state
+# 2. Safely copy ALL skel files (Niri, Ghostty, Zsh, etc.). The -n flag means NEVER overwrite existing files!
+ExecStart=/usr/bin/cp -rn /etc/skel/. %h/
+# 3. Leave a hidden stamp so systemd knows the job is done and never runs this again
+ExecStartPost=/usr/bin/touch %h/.local/state/fyros-dotfiles-injected
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --global enable fyros-dotfiles.service
+
+### 9. Configure DMS Greeter as the Default Login Canvas
 mkdir -p /etc/greetd
 
 cat << 'EOF' > /etc/greetd/config.toml
@@ -100,14 +114,12 @@ command = "dms-greeter --command niri"
 user = "greetd"
 EOF
 
-# Apply tmpfiles rules to guarantee cache directories exist on boot
 mkdir -p /usr/lib/tmpfiles.d
 cat << 'EOF' > /usr/lib/tmpfiles.d/greetd.conf
 d /var/lib/greetd 0755 greetd greetd - -
 d /var/cache/dms-greeter 0755 greetd greetd - -
 EOF
 
-# Force systemd to wait for those cache directories before starting the login screen
 mkdir -p /usr/lib/systemd/system/greetd.service.d
 cat << 'EOF' > /usr/lib/systemd/system/greetd.service.d/tmpfiles-wait.conf
 [Unit]
@@ -115,7 +127,27 @@ After=systemd-tmpfiles-setup.service
 Requires=systemd-tmpfiles-setup.service
 EOF
 
-### 9. Image Size Optimization
-# Clears all downloaded DNF5 package data, saved info, and temp caches
+### 10. Fyros Custom Branding
+echo "fyros" > /etc/hostname
+
+# Rewrite the OS Identity 
+sed -i 's/NAME="Fedora Linux"/NAME="Fyros"/' /usr/lib/os-release
+sed -i 's/PRETTY_NAME="Fedora Linux"/PRETTY_NAME="Fyros"/' /usr/lib/os-release
+sed -i 's/ID=fedora/ID=fyros/' /usr/lib/os-release
+
+# Change the OS Logo Variable
+sed -i 's/LOGO=fedora-logo-icon/LOGO=fyros-logo/' /usr/lib/os-release
+
+# Apply the Boot & UI Logos
+mkdir -p /usr/share/plymouth/themes/spinner/
+mkdir -p /usr/share/pixmaps/
+cp /ctx/branding/watermark.png /usr/share/plymouth/themes/spinner/watermark.png 2>/dev/null || true
+cp /ctx/branding/fyros-logo.png /usr/share/pixmaps/fyros-logo.png 2>/dev/null || true
+
+### 11. Custom System Wallpapers
+mkdir -p /usr/share/backgrounds/fyros
+cp -a /ctx/wallpapers/* /usr/share/backgrounds/fyros/ 2>/dev/null || true
+
+### 12. Image Size Optimization (Moved to the very end!)
 dnf5 clean all
 rm -rf /var/cache/* /tmp/*
