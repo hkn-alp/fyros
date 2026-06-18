@@ -21,7 +21,7 @@ dnf5 install -y --allowerasing \
     nautilus \
     gnome-network-displays \
     network-manager-applet \
-    xdg-desktop-portal-gnome \
+    xdg-desktop-portal-gtk \
     cava \
     qt6ct \
     qt6-qtmultimedia \
@@ -72,14 +72,15 @@ systemctl enable flatpak-preinstall.service
 
 ### 6. Enable Core System Services
 systemctl enable greetd.service
-systemctl --global enable dms.service
+systemctl --global enable add-wants niri.service dms.service
+systemctl enable power-profiles-daemon.service
 
 ### 7. Bake in Custom User Dotfiles
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
 
-#### 8. Existing User Dotfile Injector (The Magic Fix!)
+#### 8. Existing User Dotfile Injector
 # Safely copies all dotfiles to existing accounts without overwriting user data
 mkdir -p /usr/lib/systemd/user/
 cat << 'EOF' > /usr/lib/systemd/user/fyros-dotfiles.service
@@ -92,7 +93,7 @@ ConditionPathExists=!%h/.local/state/fyros-dotfiles-injected
 Type=oneshot
 # 1. Create the state directory just in case it doesn't exist
 ExecStartPre=/usr/bin/mkdir -p %h/.local/state
-# 2. Safely copy ALL skel files (Niri, Ghostty, Zsh, etc.). The -n flag means NEVER overwrite existing files!
+# 2. Safely copy ALL skel files. The -n flag means NEVER overwrite existing files!
 ExecStart=/usr/bin/cp -rn /etc/skel/. %h/
 # 3. Leave a hidden stamp so systemd knows the job is done and never runs this again
 ExecStartPost=/usr/bin/touch %h/.local/state/fyros-dotfiles-injected
@@ -131,15 +132,15 @@ EOF
 ### 10. Fyros Custom Branding
 echo "fyros" > /etc/hostname
 
-# Rewrite the OS Identity 
-sed -i 's/NAME="Fedora Linux"/NAME="Fyros"/' /usr/lib/os-release
-sed -i 's/PRETTY_NAME="Fedora Linux"/PRETTY_NAME="Fyros"/' /usr/lib/os-release
-sed -i 's/ID=fedora/ID=fyros/' /usr/lib/os-release
+# 1. Overwrite the OS Identity with our custom static file
+cp /ctx/branding/os-release /usr/lib/os-release
 
-# Change the OS Logo Variable
-sed -i 's/LOGO=fedora-logo-icon/LOGO=fyros-logo/' /usr/lib/os-release
+# 2. Dynamically inject the build date (Rolling Release!)
+BUILD_DATE=$(date +'%Y.%m.%d')
+sed -i "s/VERSION=\"1.0\"/VERSION=\"${BUILD_DATE}\"/" /usr/lib/os-release
+sed -i "s/PRETTY_NAME=\"Fyros\"/PRETTY_NAME=\"Fyros ${BUILD_DATE}\"/" /usr/lib/os-release
 
-# Apply the Boot & UI Logos
+# 3. Apply the Boot & UI Logos
 mkdir -p /usr/share/plymouth/themes/spinner/
 mkdir -p /usr/share/pixmaps/
 cp /ctx/branding/watermark.png /usr/share/plymouth/themes/spinner/watermark.png 2>/dev/null || true
