@@ -139,15 +139,23 @@ EOF
 ### 10. Fyros Custom Branding
 echo "fyros" > /etc/hostname
 
-# 1. Overwrite the OS Identity with our custom static file
-cp /ctx/branding/os-release /usr/lib/os-release
-
-# 2. Dynamically inject the build date (Rolling Release!)
+# 1. Safely rewrite the OS UI Identity
+# We use wildcards to replace the text, but deliberately leave ID=fedora alone!
 BUILD_DATE=$(date +'%Y.%m.%d')
-sed -i "s/VERSION=\"1.0\"/VERSION=\"${BUILD_DATE}\"/" /usr/lib/os-release
-sed -i "s/PRETTY_NAME=\"Fyros\"/PRETTY_NAME=\"Fyros ${BUILD_DATE}\"/" /usr/lib/os-release
+sed -i "s/^NAME=.*/NAME=\"Fyros\"/" /usr/lib/os-release
+sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"Fyros ${BUILD_DATE}\"/" /usr/lib/os-release
+sed -i "s/^LOGO=.*/LOGO=fyros-logo/" /usr/lib/os-release
 
-# 3. Apply the Boot & UI Logos
+# 2. Inject the custom Fyros fiery red ANSI color
+sed -i "s/^ANSI_COLOR=.*/ANSI_COLOR=\"0;38;2;255;54;75\"/" /usr/lib/os-release
+
+# 3. Reroute all system links to the Fyros GitHub repository
+sed -i "s|^HOME_URL=.*|HOME_URL=\"https://github.com/hkn-alp/fyros\"|" /usr/lib/os-release
+sed -i "s|^DOCUMENTATION_URL=.*|DOCUMENTATION_URL=\"https://github.com/hkn-alp/fyros\"|" /usr/lib/os-release
+sed -i "s|^SUPPORT_URL=.*|SUPPORT_URL=\"https://github.com/hkn-alp/fyros/issues\"|" /usr/lib/os-release
+sed -i "s|^BUG_REPORT_URL=.*|BUG_REPORT_URL=\"https://github.com/hkn-alp/fyros/issues\"|" /usr/lib/os-release
+
+# 4. Apply the Boot & UI Logos
 mkdir -p /usr/share/plymouth/themes/spinner/
 mkdir -p /usr/share/pixmaps/
 cp /ctx/branding/watermark.png /usr/share/plymouth/themes/spinner/watermark.png 2>/dev/null || true
