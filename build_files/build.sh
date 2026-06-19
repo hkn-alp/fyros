@@ -17,7 +17,6 @@ dnf5 install -y --allowerasing \
     dms \
     dms-greeter \
     dgop \
-    accountsservice \
     dsearch \
     matugen \
     cliphist \
@@ -26,11 +25,10 @@ dnf5 install -y --allowerasing \
     file-roller \
     gnome-network-displays \
     network-manager-applet \
-    xdg-desktop-portal-gtk \
     cava \
     brightnessctl \
     playerctl \
-    polkit-gnome \
+    mate-polkit \
     dcal \
     zsh \
     starship \
@@ -39,16 +37,13 @@ dnf5 install -y --allowerasing \
     power-profiles-daemon \
     cups-pk-helper \
     input-remapper \
-    fwupd \
     gnome-firmware \
     tailscale \
     btop \
     grim \
     slurp \
     swappy \
-    wl-clipboard \
     gvfs \
-    openssh-clients \
     gcr
 
 ### 4. Install Himalaya CLI (Direct Binary)
