@@ -65,6 +65,9 @@ cat << 'EOF' > /usr/bin/fyros-welcome.sh
 flatpak remote-add --user --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
 flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
+# Install DankMaterialShell plugins silently as the user
+dms plugins install dankKDEConnect
+
 # Launch the GUI Checklist with your COMPLETE app arsenal
 CHOICES=$(zenity --list --checklist \
     --title="Welcome to Fyros" \
@@ -146,10 +149,6 @@ EOF
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
-
-# Download and inject DMS plugins directly into the user skeleton
-mkdir -p /etc/skel/.config/DankMaterialShell/plugins
-HOME=/etc/skel dms plugins install dankKDEConnect
 
 #### 9. Existing User Dotfile Injector
 mkdir -p /usr/lib/systemd/user/
