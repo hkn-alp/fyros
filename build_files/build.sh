@@ -57,9 +57,8 @@ dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
 ### 6. The Fyros First-Boot Welcome App
-# 1. Create the installation script
-mkdir -p /usr/local/bin
-cat << 'EOF' > /usr/local/bin/fyros-welcome.sh
+# 1. Create the installation script (Changed to /usr/bin)
+cat << 'EOF' > /usr/bin/fyros-welcome.sh
 #!/bin/bash
 
 # Ensure flathub and valent repos are active
@@ -115,7 +114,7 @@ zenity --info --title="Setup Complete" --text="Your Fyros installation is fully 
 rm -f ~/.config/autostart/fyros-welcome.desktop
 EOF
 
-chmod +x /usr/local/bin/fyros-welcome.sh
+chmod +x /usr/bin/fyros-welcome.sh
 
 # 2. Create the Autostart trigger inside the user's skeleton folder
 mkdir -p /etc/skel/.config/autostart
@@ -123,7 +122,7 @@ cat << 'EOF' > /etc/skel/.config/autostart/fyros-welcome.desktop
 [Desktop Entry]
 Type=Application
 Name=Fyros Welcome Setup
-Exec=/usr/local/bin/fyros-welcome.sh
+Exec=/usr/bin/fyros-welcome.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
