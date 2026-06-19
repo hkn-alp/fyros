@@ -209,12 +209,14 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // === Screenshots ===
-    XF86Launch1 { screenshot; }
-    Ctrl+XF86Launch1 { screenshot-screen; }
-    Alt+XF86Launch1 { screenshot-window; }
-    Print { screenshot; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
+    XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp)\" - | swappy -f -"; }
+    Ctrl+XF86Launch1 { spawn "bash" "-c" "grim - | swappy -f -"; }
+    Alt+XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp -p)\" - | swappy -f -"; }
+    
+    Print { spawn "bash" "-c" "grim -g \"$(slurp)\" - | swappy -f -"; }
+    Ctrl+Print { spawn "bash" "-c" "grim - | swappy -f -"; }
+    Alt+Print { spawn "bash" "-c" "grim -g \"$(slurp -p)\" - | swappy -f -"; }
+    
     // === System Controls ===
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
     Mod+Shift+P { power-off-monitors; }

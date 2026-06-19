@@ -2,6 +2,17 @@
 // "/-" comments out the following node.
 // Check the wiki for a full description of the configuration:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+
+spawn-at-startup "/usr/libexec/polkit-gnome-authentication-agent-1"
+// Set the SSH Agent path so Valent can securely mount phone files
+environment {
+    SSH_AUTH_SOCK "/run/user/1000/gcr/ssh"
+}
+
+// Import the SSH environment into systemd and launch Valent silently in the background
+spawn-at-startup "systemctl" "--user" "import-environment" "SSH_AUTH_SOCK"
+spawn-at-startup "flatpak" "run" "ca.andyholmes.Valent" "--gapplication-service"
+
 config-notification {
     disable-failed
 }
@@ -230,7 +241,7 @@ window-rule {
     match app-id=r#"^blueman-manager$"#
     match app-id=r#"^org\.gnome\.Nautilus$"#
     match app-id=r#"^xdg-desktop-portal$"#
-    open-floating true
+    open-floating false
 }
 window-rule {
     match app-id=r#"^steam$"# title=r#"^notificationtoasts_\d+_desktop$"#
@@ -254,7 +265,7 @@ window-rule {
 window-rule {
     match app-id=r#"org.quickshell$"#
     match app-id=r#"com.danklinux.dms$"#
-    open-floating true
+    open-floating false
 }
 debug {
     honor-xdg-activation-with-invalid-serial

@@ -1,0 +1,103 @@
+{
+  "id": "fyros-flame",
+  "name": "Fyros Flame",
+  "version": "1.0.0",
+  "author": "Hakan Alparslan",
+  "description": "A vibrant, fiery theme inspired by the warm gradients of the Fyros logo.",
+  "dark": {},
+  "light": {},
+  "variants": {
+    "type": "multi",
+    "defaults": {
+      "dark": {
+        "accent": "pink",
+        "flavor": "ember"
+      },
+      "light": {
+        "accent": "pink",
+        "flavor": "flare"
+      }
+    },
+    "flavors": [
+      {
+        "id": "ember",
+        "name": "Ember",
+        "dark": {
+          "surface": "#1E1E1E",
+          "surfaceText": "#FFFFFF",
+          "surfaceVariant": "#333333",
+          "surfaceVariantText": "#C4C4C4",
+          "background": "#121212",
+          "backgroundText": "#FFFFFF",
+          "outline": "#666666",
+          "surfaceContainer": "#222222",
+          "surfaceContainerHigh": "#2A2A2A",
+          "surfaceContainerHighest": "#303030",
+          "error": "#FF4747",
+          "warning": "#FF8600",
+          "info": "#FFE28D"
+        },
+        "light": {}
+      },
+      {
+        "id": "flare",
+        "name": "Flare",
+        "dark": {},
+        "light": {
+          "surface": "#F4F4F4",
+          "surfaceText": "#1A1A1A",
+          "surfaceVariant": "#E0E0E0",
+          "surfaceVariantText": "#4D4D4D",
+          "background": "#FAFAFA",
+          "backgroundText": "#1A1A1A",
+          "outline": "#888888",
+          "surfaceContainer": "#EEEEEE",
+          "surfaceContainerHigh": "#E5E5E5",
+          "surfaceContainerHighest": "#DDDDDD",
+          "error": "#FF1630",
+          "warning": "#FF7133",
+          "info": "#FFBC5A"
+        }
+      }
+    ],
+    "accents": [
+      {
+        "id": "pink",
+        "name": "Pink",
+        "ember": {
+          "primary": "#FF0045",
+          "primaryText": "#FFFFFF",
+          "primaryContainer": "#FF1630",
+          "secondary": "#FF6000",
+          "surfaceTint": "#FF0045"
+        },
+        "flare": {
+          "primary": "#FF3B46",
+          "primaryText": "#FFFFFF",
+          "primaryContainer": "#FFCD84",
+          "secondary": "#FF810D",
+          "surfaceTint": "#FF3B46"
+        }
+      },
+      {
+        "id": "gold",
+        "name": "Gold",
+        "ember": {
+          "primary": "#FF6000",
+          "primaryText": "#FFFFFF",
+          "primaryContainer": "#FF7234",
+          "secondary": "#FF0045",
+          "surfaceTint": "#FF6000"
+        },
+        "flare": {
+          "primary": "#FF810D",
+          "primaryText": "#FFFFFF",
+          "primaryContainer": "#FFBC5A",
+          "secondary": "#FF3B46",
+          "surfaceTint": "#FF810D"
+        }
+      }
+    ]
+  },
+  "sourceDir": "fyros-flame"
+}
