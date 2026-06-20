@@ -108,16 +108,27 @@ echo "Fetching dankKDEConnect plugin..."
 mkdir -p /etc/skel/.config/DankMaterialShell/plugins
 JSON_URL="https://raw.githubusercontent.com/AvengeMedia/dms-plugin-registry/master/plugins/dank-kdeconnect.json"
 
-# Extract the repository path using jq (Checks for 'repository' or 'url' fields)
-PLUGIN_REPO=$(curl -sL "$JSON_URL" | jq -r '.repository // .url')
+# Download and parse the JSON (Fixed keys: .repo and .path)
+PLUGIN_JSON=$(curl -sL "$JSON_URL")
+PLUGIN_REPO=$(echo "$PLUGIN_JSON" | jq -r '.repo')
+PLUGIN_PATH=$(echo "$PLUGIN_JSON" | jq -r '.path // empty')
 
 # Convert to full GitHub URL if the JSON only provides the username/repo format
 if [[ "$PLUGIN_REPO" != http* ]]; then
     PLUGIN_REPO="https://github.com/${PLUGIN_REPO}.git"
 fi
 
-# Clone the plugin directly into the skeleton
-git clone "$PLUGIN_REPO" /etc/skel/.config/DankMaterialShell/plugins/dankKDEConnect
+# Safely extract the plugin (Handles both Dedicated Repos and Monorepos)
+if [[ -n "$PLUGIN_PATH" ]]; then
+    echo "Monorepo detected. Extracting $PLUGIN_PATH..."
+    git clone --depth 1 "$PLUGIN_REPO" /tmp/dms-plugin-repo
+    mkdir -p /etc/skel/.config/DankMaterialShell/plugins/dankKDEConnect
+    cp -a "/tmp/dms-plugin-repo/$PLUGIN_PATH/." "/etc/skel/.config/DankMaterialShell/plugins/dankKDEConnect/"
+    rm -rf /tmp/dms-plugin-repo
+else
+    echo "Dedicated repo detected. Cloning..."
+    git clone "$PLUGIN_REPO" /etc/skel/.config/DankMaterialShell/plugins/dankKDEConnect
+fi
 
 #### 9. Existing User Dotfile Injector
 mkdir -p /usr/lib/systemd/user/
