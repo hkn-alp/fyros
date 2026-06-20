@@ -175,14 +175,17 @@ BUILD_DATE=$(date +'%Y.%m.%d')
 sed -i "s/^NAME=.*/NAME=\"Fyros\"/" /usr/lib/os-release
 sed -i "s/^DEFAULT_HOSTNAME=.*/DEFAULT_HOSTNAME=\"fyros\"/" /usr/lib/os-release
 sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"Fyros ${BUILD_DATE}\"/" /usr/lib/os-release
-sed -i "s/^ID=.*/ID=fyros/" /usr/lib/os-release
-echo 'ID_LIKE="fedora"' >> /usr/lib/os-release
+sed -i "s|^ID=fedora|ID=fyros\nID_LIKE=\"fedora\"|" /usr/lib/os-release
+sed -i "s|^VARIANT_ID=.*|VARIANT_ID=fyros|" /usr/lib/os-release
 sed -i "s/^LOGO=.*/LOGO=fyros-logo/" /usr/lib/os-release
 sed -i "s/^ANSI_COLOR=.*/ANSI_COLOR=\"0;38;2;255;54;75\"/" /usr/lib/os-release
 sed -i "s|^HOME_URL=.*|HOME_URL=\"https://github.com/hkn-alp/fyros\"|" /usr/lib/os-release
 sed -i "s|^DOCUMENTATION_URL=.*|DOCUMENTATION_URL=\"https://github.com/hkn-alp/fyros\"|" /usr/lib/os-release
 sed -i "s|^SUPPORT_URL=.*|SUPPORT_URL=\"https://github.com/hkn-alp/fyros/issues\"|" /usr/lib/os-release
 sed -i "s|^BUG_REPORT_URL=.*|BUG_REPORT_URL=\"https://github.com/hkn-alp/fyros/issues\"|" /usr/lib/os-release
+
+# Fix GRUB bootloader path
+sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg
 
 mkdir -p /usr/share/plymouth/themes/spinner/
 mkdir -p /usr/share/pixmaps/

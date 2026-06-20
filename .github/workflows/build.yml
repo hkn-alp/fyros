@@ -5,12 +5,17 @@ on:
     branches:
       - main
   schedule:
-    - cron: '05 03 * * *'  # 03:05am UTC everyday
+    - cron: '00 18 * * 5'  # 18:00 UTC every Friday
   push:
     branches:
       - main
     paths-ignore:
-      - '**/README.md'
+      - '**.md'                 # Ignores README.md, CONTRIBUTING.md, etc.
+      - 'LICENSE'               # Ignores legal text changes
+      - '.github/ISSUE_TEMPLATE/**' # Ignores issue templates
+      - '.github/workflows/build-disk.yml' # Ignores changes to the ISO builder script
+      - '.gitignore'            # Ignores git configuration changes
+      - 'docs/**'               # If you ever create a documentation folder
   workflow_dispatch:
 
 env:
