@@ -57,9 +57,8 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
-### 6. Background Pre-Installers (Flatpaks & Plugins)
+### 6. The Global Flatpak Installer
 
-# Part A: The Global Flatpak Installer
 mkdir -p /usr/lib/systemd/system/
 cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
 [Unit]
@@ -80,24 +79,6 @@ WantedBy=multi-user.target
 EOF
 
 systemctl enable flatpak-preinstall.service
-
-# Part B: The User-Space DMS Plugin Installer (Bypasses the root block!)
-mkdir -p /usr/lib/systemd/user/
-cat << 'EOF' > /usr/lib/systemd/user/dms-plugin-install.service
-[Unit]
-Description=Install DMS Plugins on First Login
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/dms plugins install dankKDEConnect
-ExecStartPost=/usr/bin/systemctl --user disable dms-plugin-install.service
-
-[Install]
-WantedBy=default.target
-EOF
-
-systemctl --global enable dms-plugin-install.service
 
 ### 7. Enable Core System Services
 systemctl enable greetd.service
@@ -121,6 +102,22 @@ echo "i2c-dev" > /usr/lib/modules-load.d/i2c.conf
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
+
+# Bake the DMS KDEConnect Plugin into the system skeleton
+echo "Fetching dankKDEConnect plugin..."
+mkdir -p /etc/skel/.config/DankMaterialShell/plugins
+JSON_URL="https://raw.githubusercontent.com/AvengeMedia/dms-plugin-registry/master/plugins/dank-kdeconnect.json"
+
+# Extract the repository path using jq (Checks for 'repository' or 'url' fields)
+PLUGIN_REPO=$(curl -sL "$JSON_URL" | jq -r '.repository // .url')
+
+# Convert to full GitHub URL if the JSON only provides the username/repo format
+if [[ "$PLUGIN_REPO" != http* ]]; then
+    PLUGIN_REPO="https://github.com/${PLUGIN_REPO}.git"
+fi
+
+# Clone the plugin directly into the skeleton
+git clone "$PLUGIN_REPO" /etc/skel/.config/DankMaterialShell/plugins/dankKDEConnect
 
 #### 9. Existing User Dotfile Injector
 mkdir -p /usr/lib/systemd/user/
