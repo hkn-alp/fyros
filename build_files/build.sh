@@ -9,19 +9,14 @@ dnf5 -y copr enable atim/starship
 
 ### 2. Purge Base Image Bloat
 # Ripping out the native versions so we can use Flatpaks or our preferred apps
-dnf5 remove -y firefox firefox-langpacks alacritty
+dnf5 remove -y firefox firefox-langpacks alacritty nvtop htop btop
 
 ### 3. Install the Hyper-Optimized Native Ecosystem
-dnf5 install -y --allowerasing \
+dnf5 install -y --allowerasing --exclude=alacritty \
     niri \
-    dms \
-    dms-greeter \
-    dgop \
-    dsearch \
-    matugen \
     cliphist \
     ghostty \
-    nemo \
+    nautilus \
     file-roller \
     gnome-network-displays \
     network-manager-applet \
@@ -39,12 +34,18 @@ dnf5 install -y --allowerasing \
     input-remapper \
     gnome-firmware \
     tailscale \
-    btop \
     grim \
     slurp \
     swappy \
     gvfs \
-    gcr
+    gcr \
+    i2c-tools \
+    ddcutil \
+    dms \
+    dms-greeter \
+    dgop \
+    dsearch \
+    matugen
 
 ### 4. Install Himalaya CLI (Direct Binary)
 curl -Lo /usr/bin/himalaya https://github.com/pimalaya/himalaya/releases/latest/download/himalaya-linux-amd64
@@ -56,80 +57,47 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 
-### 6. The Fyros First-Boot Welcome App
-# 1. Create the installation script (Changed to /usr/bin)
-cat << 'EOF' > /usr/bin/fyros-welcome.sh
-#!/bin/bash
+### 6. Background Pre-Installers (Flatpaks & Plugins)
 
-# Ensure flathub and valent repos are active
-flatpak remote-add --user --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
-flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+# Part A: The Global Flatpak Installer
+mkdir -p /usr/lib/systemd/system/
+cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
+[Unit]
+Description=Install Custom Flatpaks on First Boot
+Wants=network-online.target
+After=network-online.target
 
-# Install DankMaterialShell plugins silently as the user
-dms plugins install dankKDEConnect
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
+ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+ExecStart=/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
+ExecStart=/usr/bin/flatpak install --system -y flathub dev.zed.Zed org.mozilla.firefox page.codeberg.bazaar.bazaar io.github.flattool.Warehouse com.github.tchx84.Flatseal org.gnome.Snapshot org.gnome.SoundRecorder org.gnome.TextEditor io.github.dvlv.boxbuddy org.gnome.Boxes io.gitlab.adhami3310.Impression org.gnome.World.PikaBackup org.gnome.baobab org.gnome.Connections
+ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
 
-# Launch the GUI Checklist with your COMPLETE app arsenal
-CHOICES=$(zenity --list --checklist \
-    --title="Welcome to Fyros" \
-    --text="Select the applications you want to install to customize your system:" \
-    --column="Install" --column="App ID" --column="Application" \
-    TRUE "dev.zed.Zed" "Zed Code Editor" \
-    TRUE "org.mozilla.firefox" "Firefox Browser" \
-    TRUE "page.codeberg.bazaar.bazaar" "Bazaar (App Store)" \
-    TRUE "io.github.flattool.Warehouse" "Warehouse (Flatpak Manager)" \
-    TRUE "com.github.tchx84.Flatseal" "Flatseal (Permissions)" \
-    TRUE "org.gnome.Snapshot" "Camera" \
-    TRUE "org.gnome.SoundRecorder" "Sound Recorder" \
-    TRUE "org.gnome.TextEditor" "Text Editor" \
-    TRUE "ca.andyholmes.Valent" "Valent (Phone Sync)" \
-    TRUE "io.github.dvlv.boxbuddy" "BoxBuddy (Distrobox Manager)" \
-    TRUE "org.gnome.Boxes" "GNOME Boxes (Virtual Machines)" \
-    TRUE "io.gitlab.adhami3310.Impression" "Impression (USB Flasher)" \
-    TRUE "org.gnome.World.PikaBackup" "Pika Backup" \
-    TRUE "org.gnome.baobab" "Disk Usage Analyzer" \
-    TRUE "org.gnome.Connections" "Remote Connections" \
-    --width=650 --height=600 --separator=" ")
-
-# If the user clicks Cancel or closes the window, exit gracefully
-if [ -z "$CHOICES" ]; then
-    zenity --info --title="Setup Skipped" --text="You can always install these apps later via the terminal or Bazaar."
-    rm -f ~/.config/autostart/fyros-welcome.desktop
-    exit 0
-fi
-
-# Show a progress bar while installing the selected apps
-(
-    total_apps=$(echo $CHOICES | wc -w)
-    current_app=0
-    
-    for APP in $CHOICES; do
-        flatpak install --user -y $APP
-        current_app=$((current_app + 1))
-        percentage=$((current_app * 100 / total_apps))
-        echo "$percentage"
-        echo "# Installing $APP..."
-    done
-) | zenity --progress --title="Installing Applications" --text="Preparing setup..." --percentage=0 --auto-close
-
-zenity --info --title="Setup Complete" --text="Your Fyros installation is fully customized and ready to use!"
-
-# Self-destruct the autostart trigger so this NEVER runs again
-rm -f ~/.config/autostart/fyros-welcome.desktop
+[Install]
+WantedBy=multi-user.target
 EOF
 
-chmod +x /usr/bin/fyros-welcome.sh
+systemctl enable flatpak-preinstall.service
 
-# 2. Create the Autostart trigger inside the user's skeleton folder
-mkdir -p /etc/skel/.config/autostart
-cat << 'EOF' > /etc/skel/.config/autostart/fyros-welcome.desktop
-[Desktop Entry]
-Type=Application
-Name=Fyros Welcome Setup
-Exec=/usr/bin/fyros-welcome.sh
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
+# Part B: The User-Space DMS Plugin Installer (Bypasses the root block!)
+mkdir -p /usr/lib/systemd/user/
+cat << 'EOF' > /usr/lib/systemd/user/dms-plugin-install.service
+[Unit]
+Description=Install DMS Plugins on First Login
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/dms plugins install dankKDEConnect
+ExecStartPost=/usr/bin/systemctl --user disable dms-plugin-install.service
+
+[Install]
+WantedBy=default.target
 EOF
+
+systemctl --global enable dms-plugin-install.service
 
 ### 7. Enable Core System Services
 systemctl enable greetd.service
@@ -144,6 +112,10 @@ cat << 'EOF' > /usr/lib/systemd/user/dms.service.d/niri-only.conf
 [Unit]
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 EOF
+
+# Enable hardware DDC/CI control for external monitors
+mkdir -p /usr/lib/modules-load.d
+echo "i2c-dev" > /usr/lib/modules-load.d/i2c.conf
 
 ### 8. Bake in Custom User Dotfiles
 mkdir -p /etc/skel/.config
@@ -203,6 +175,8 @@ BUILD_DATE=$(date +'%Y.%m.%d')
 sed -i "s/^NAME=.*/NAME=\"Fyros\"/" /usr/lib/os-release
 sed -i "s/^DEFAULT_HOSTNAME=.*/DEFAULT_HOSTNAME=\"fyros\"/" /usr/lib/os-release
 sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"Fyros ${BUILD_DATE}\"/" /usr/lib/os-release
+sed -i "s/^ID=.*/ID=fyros/" /usr/lib/os-release
+echo 'ID_LIKE="fedora"' >> /usr/lib/os-release
 sed -i "s/^LOGO=.*/LOGO=fyros-logo/" /usr/lib/os-release
 sed -i "s/^ANSI_COLOR=.*/ANSI_COLOR=\"0;38;2;255;54;75\"/" /usr/lib/os-release
 sed -i "s|^HOME_URL=.*|HOME_URL=\"https://github.com/hkn-alp/fyros\"|" /usr/lib/os-release
@@ -216,6 +190,11 @@ cp /ctx/branding/watermark.png /usr/share/plymouth/themes/spinner/watermark.png 
 cp /ctx/branding/fyros-logo.png /usr/share/pixmaps/fyros-logo.png 2>/dev/null || true
 
 ### 12. Custom System Wallpapers
+# Wipe default Fedora wallpapers to save image size
+rm -rf /usr/share/backgrounds/f44 2>/dev/null || true
+rm -rf /usr/share/backgrounds/fedora-workstation 2>/dev/null || true
+
+# Install Fyros wallpapers
 mkdir -p /usr/share/backgrounds/fyros
 cp -a /ctx/wallpapers/* /usr/share/backgrounds/fyros/ 2>/dev/null || true
 

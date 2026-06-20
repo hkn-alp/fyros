@@ -67,14 +67,14 @@
         "ember": {
           "primary": "#FF0045",
           "primaryText": "#FFFFFF",
-          "primaryContainer": "#FF1630",
+          "primaryContainer": "#4A0014",
           "secondary": "#FF6000",
           "surfaceTint": "#FF0045"
         },
         "flare": {
           "primary": "#FF3B46",
           "primaryText": "#FFFFFF",
-          "primaryContainer": "#FFCD84",
+          "primaryContainer": "#FFD9E2",
           "secondary": "#FF810D",
           "surfaceTint": "#FF3B46"
         }
@@ -85,14 +85,14 @@
         "ember": {
           "primary": "#FF6000",
           "primaryText": "#FFFFFF",
-          "primaryContainer": "#FF7234",
+          "primaryContainer": "#4A1C00",
           "secondary": "#FF0045",
           "surfaceTint": "#FF6000"
         },
         "flare": {
           "primary": "#FF810D",
           "primaryText": "#FFFFFF",
-          "primaryContainer": "#FFBC5A",
+          "primaryContainer": "#FFE6D5",
           "secondary": "#FF3B46",
           "surfaceTint": "#FF810D"
         }
