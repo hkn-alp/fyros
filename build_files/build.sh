@@ -7,6 +7,7 @@ dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable atim/starship
 dnf5 -y copr enable lihaohong/yazi
+dnf5 -y copr enable atim/himalaya
 
 ### 2. Purge Base Image Bloat
 # Ripping out the native versions so we can use Flatpaks or our preferred apps
@@ -35,6 +36,7 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     input-remapper \
     gnome-firmware \
     tailscale \
+    himalaya \
     grim \
     slurp \
     swappy \
@@ -68,6 +70,7 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 dnf5 -y copr disable lihaohong/yazi
+dnf5 -y copr disable atim/himalaya
 
 ### 6. The Global Flatpak Installer
 

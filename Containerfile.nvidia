@@ -1,0 +1,19 @@
+# 1. Start with the freshly-built local Fyros image
+FROM localhost/fyros:latest AS base
+
+# 2. Rip the pre-compiled OPEN drivers from Universal Blue's server
+COPY --from=ghcr.io/ublue-os/akmods-nvidia-open:main /rpms/ /tmp/nvidia-rpms/
+
+# 3. Install the drivers, configure the kernel, and clean up
+RUN set -x && \
+    # Install the injected Nvidia RPMs
+    dnf5 install -y /tmp/nvidia-rpms/*/*.rpm && \
+    # Add Nvidia kernel arguments so the bootloader knows to use them instead of Nouveau
+    sed -i 's/^GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="rd.driver.blacklist=nouveau modprobe.blacklist=nouveau nvidia-drm.modeset=1 nvidia-drm.fbdev=1 /' /etc/default/grub && \
+    # Clean up the temporary RPMs to keep the image size optimized
+    rm -rf /tmp/nvidia-rpms && \
+    dnf5 clean all
+
+### LINTING
+## Verify the Nvidia layered image is correct.
+RUN bootc container lint
