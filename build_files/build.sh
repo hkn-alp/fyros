@@ -60,10 +60,6 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     dsearch \
     matugen
 
-### 4. Install Himalaya CLI (Direct Binary)
-curl -Lo /usr/bin/himalaya https://github.com/pimalaya/himalaya/releases/latest/download/himalaya-linux-amd64
-chmod +x /usr/bin/himalaya
-
 ### 5. Disable COPRs
 dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable avengemedia/dms
