@@ -6,6 +6,7 @@ dnf5 -y copr enable avengemedia/danklinux
 dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable atim/starship
+dnf5 -y copr enable lihaohong/yazi
 
 ### 2. Purge Base Image Bloat
 # Ripping out the native versions so we can use Flatpaks or our preferred apps
@@ -41,6 +42,16 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     gcr \
     i2c-tools \
     ddcutil \
+    yazi \
+    ffmpegthumbnailer \
+    7zip \
+    jq \
+    poppler-utils \
+    fd-find \
+    ripgrep \
+    fzf \
+    zoxide \
+    ImageMagick \
     dms \
     dms-greeter \
     dgop \
@@ -56,6 +67,7 @@ dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
+dnf5 -y copr disable lihaohong/yazi
 
 ### 6. The Global Flatpak Installer
 

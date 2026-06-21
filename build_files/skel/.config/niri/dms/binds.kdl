@@ -6,6 +6,12 @@ binds {
 
     // === Application Launchers ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "ghostty"; }
+    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "ghostty"; }
+    Mod+E hotkey-overlay-title="Open CLI File Manager (Yazi)" { spawn "ghostty" "-e" "yazi"; }
+    Mod+Shift+E hotkey-overlay-title="Open GUI File Manager (Nautilus)" { spawn "nautilus"; }
+    Mod+B hotkey-overlay-title="Open Web Browser" { spawn "flatpak" "run" "org.mozilla.firefox"; }
+
+    // === DankMaterialShell Interfaces ===
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "dms" "ipc" "call" "spotlight" "toggle";
     }
@@ -15,7 +21,6 @@ binds {
     Mod+M hotkey-overlay-title="Task Manager" {
         spawn "dms" "ipc" "call" "processlist" "focusOrToggle";
     }
-
     Super+X hotkey-overlay-title="Power Menu: Toggle" { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
     Mod+Comma hotkey-overlay-title="Settings" {
         spawn "dms" "ipc" "call" "settings" "focusOrToggle";
@@ -26,11 +31,14 @@ binds {
     Mod+N hotkey-overlay-title="Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
     Mod+Shift+N hotkey-overlay-title="Notepad" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
 
+    // === System Controls ===
+    Mod+Q hotkey-overlay-title="Close Window" { close-window; }
+    Mod+Shift+Q hotkey-overlay-title="Quit Desktop Session" { quit; }
+
     // === Security ===
     Mod+Alt+L hotkey-overlay-title="Lock Screen" {
         spawn "dms" "ipc" "call" "lock" "lock";
     }
-    Mod+Shift+E { quit; }
     Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
         spawn "dms" "ipc" "call" "processlist" "focusOrToggle";
     }
@@ -48,24 +56,24 @@ binds {
     XF86AudioMicMute allow-when-locked=true {
         spawn "dms" "ipc" "call" "audio" "micmute";
     }
-		XF86AudioPause allow-when-locked=true {
-		    spawn "dms" "ipc" "call" "mpris" "playPause";
-		}
-		XF86AudioPlay allow-when-locked=true {
-		    spawn "dms" "ipc" "call" "mpris" "playPause";
-		}
-		XF86AudioPrev allow-when-locked=true {
-		    spawn "dms" "ipc" "call" "mpris" "previous";
-		}
-		XF86AudioNext allow-when-locked=true {
-		    spawn "dms" "ipc" "call" "mpris" "next";
-		}
-        Ctrl+XF86AudioRaiseVolume allow-when-locked=true {
-            spawn "dms" "ipc" "call" "mpris" "increment" "3";
-        }
-        Ctrl+XF86AudioLowerVolume allow-when-locked=true {
-            spawn "dms" "ipc" "call" "mpris" "decrement" "3";
-        }
+    XF86AudioPause allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "playPause";
+    }
+    XF86AudioPlay allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "playPause";
+    }
+    XF86AudioPrev allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "previous";
+    }
+    XF86AudioNext allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "next";
+    }
+    Ctrl+XF86AudioRaiseVolume allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "increment" "3";
+    }
+    Ctrl+XF86AudioLowerVolume allow-when-locked=true {
+        spawn "dms" "ipc" "call" "mpris" "decrement" "3";
+    }
 
     // === Brightness Controls ===
     XF86MonBrightnessUp allow-when-locked=true {
@@ -76,7 +84,6 @@ binds {
     }
 
     // === Window Management ===
-    Mod+Q repeat=false { close-window; }
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
     Mod+Shift+T { toggle-window-floating; }
@@ -112,8 +119,6 @@ binds {
 
     // === Monitor Navigation ===
     Mod+Ctrl+Left  { focus-monitor-left; }
-    //Mod+Ctrl+Down  { focus-monitor-down; }
-    //Mod+Ctrl+Up    { focus-monitor-up; }
     Mod+Ctrl+Right { focus-monitor-right; }
     Mod+Ctrl+H     { focus-monitor-left; }
     Mod+Ctrl+J     { focus-monitor-down; }
@@ -209,15 +214,32 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // === Screenshots ===
-    XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp)\" - | swappy -f -"; }
-    Ctrl+XF86Launch1 { spawn "bash" "-c" "grim - | swappy -f -"; }
-    Alt+XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp -p)\" - | swappy -f -"; }
     
+    // 1. Region -> Swappy Editor
+    XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp)\" - | swappy -f -"; }
     Print { spawn "bash" "-c" "grim -g \"$(slurp)\" - | swappy -f -"; }
+    
+    // 2. Full Screen -> Swappy Editor
+    Ctrl+XF86Launch1 { spawn "bash" "-c" "grim - | swappy -f -"; }
     Ctrl+Print { spawn "bash" "-c" "grim - | swappy -f -"; }
+    
+    // 3. Pixel Color Picker -> Swappy Editor
+    Alt+XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp -p)\" - | swappy -f -"; }
     Alt+Print { spawn "bash" "-c" "grim -g \"$(slurp -p)\" - | swappy -f -"; }
     
-    // === System Controls ===
+    // 4. Full Screen -> Save to Disk (Silent)
+    Shift+XF86Launch1 { spawn "bash" "-c" "mkdir -p ~/Pictures/Screenshots && grim ~/Pictures/Screenshots/Screenshot-$(date +'%Y%m%d-%H%M%S').png"; }
+    Shift+Print { spawn "bash" "-c" "mkdir -p ~/Pictures/Screenshots && grim ~/Pictures/Screenshots/Screenshot-$(date +'%Y%m%d-%H%M%S').png"; }
+
+    // 5. Region -> Copy to Clipboard (Silent)
+    Mod+XF86Launch1 { spawn "bash" "-c" "grim -g \"$(slurp)\" - | wl-copy"; }
+    Mod+Print { spawn "bash" "-c" "grim -g \"$(slurp)\" - | wl-copy"; }
+
+    // 6. Full Screen -> Copy to Clipboard (Silent)
+    Mod+Ctrl+XF86Launch1 { spawn "bash" "-c" "grim - | wl-copy"; }
+    Mod+Ctrl+Print { spawn "bash" "-c" "grim - | wl-copy"; }
+    
+    // === Hardware & Escape Controls ===
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
     Mod+Shift+P { power-off-monitors; }
 }
