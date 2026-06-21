@@ -5,13 +5,12 @@ FROM localhost/fyros:latest AS base
 # (Using main-44 to match the Fedora 44 base kernel)
 COPY --from=ghcr.io/ublue-os/akmods-nvidia-open:main-44 /rpms/ /tmp/nvidia-rpms/
 
-# 3. Install the drivers, configure the kernel, and clean up
+# 3. Install the drivers and clean up
 RUN set -x && \
-    # Install the Universal Blue Nvidia addons and the Kernel Modules
+    # Install the Universal Blue Nvidia addons (This automatically configures the kernel arguments!)
     dnf5 install -y /tmp/nvidia-rpms/ublue-os/ublue-os-nvidia*.rpm && \
+    # Install the actual Nvidia Kernel Modules
     dnf5 install -y /tmp/nvidia-rpms/kmods/kmod-nvidia*.rpm && \
-    # Add Nvidia kernel arguments so the bootloader knows to use them instead of Nouveau
-    sed -i 's/^GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="rd.driver.blacklist=nouveau modprobe.blacklist=nouveau nvidia-drm.modeset=1 nvidia-drm.fbdev=1 /' /etc/default/grub && \
     # Clean up the temporary RPMs to keep the image size optimized
     rm -rf /tmp/nvidia-rpms && \
     dnf5 clean all
