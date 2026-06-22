@@ -29,7 +29,7 @@ jobs:
           iso_name: ${{ inputs.image_name }}-install.iso
 
       - name: Upload ISO as Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.image_name }}-iso
           path: ./${{ inputs.image_name }}-install.iso
