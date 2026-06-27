@@ -201,10 +201,10 @@ environment {
     // =========================================================================
     // 6. QT Framework Ecosystem Handling
     // =========================================================================
-    // Mandates native Wayland contexts for QT5/QT6 apps (VLC, OBS Studio, qBittorrent).
+    // Mandates native Wayland contexts for QT5/QT6 apps.
     QT_QPA_PLATFORM "wayland;xcb"
-    // Forces QT applications to adopt your native GTK3 styling so everything looks uniform.
-    QT_QPA_PLATFORMTHEME "gtk3"
+    // Routes QT apps to the qt6ct/qt5ct configuration tools so DMS can dynamically theme them.
+    QT_QPA_PLATFORMTHEME "qt6ct"
 
     // =========================================================================
     // 7. Non-Reparenting Abstract Window Toolkit Layouts (Java Fixes)
@@ -217,7 +217,7 @@ hotkey-overlay {
     skip-at-startup
 }
 prefer-no-csd
-screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+screenshot-path "~/Pictures/Screenshots/Screenshot-%Y-%m-%d %H-%M-%S.png"
 animations {
     workspace-switch {
         spring damping-ratio=0.80 stiffness=523 epsilon=0.0001

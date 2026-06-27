@@ -59,6 +59,16 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     dsearch \
     dcal \
     matugen
+    
+# Install Qt Wayland and Theming backends
+dnf5 install -y --setopt=install_weak_deps=False \
+    qt5ct \
+    qt6ct \
+    qt5-qtwayland \
+    qt6-qtwayland
+
+# Destroy the Qt Settings app launcher icons
+rm -f /usr/share/applications/qt5ct.desktop /usr/share/applications/qt6ct.desktop 2>/dev/null || true
 
 ### 5. Disable COPRs
 dnf5 -y copr disable avengemedia/danklinux
