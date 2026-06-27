@@ -165,8 +165,53 @@ overview {
 // See the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
 environment {
+    // =========================================================================
+    // 1. Core System & Security Routing 
+    // =========================================================================
     XDG_CURRENT_DESKTOP "niri"
     SSH_AUTH_SOCK "/run/user/1000/gcr/ssh"
+
+    // =========================================================================
+    // 2. Legacy Toolkit & UI Theme Alignment
+    // =========================================================================
+    // Forces older GTK3 apps (like mate-polkit) to adopt dark mode assets.
+    GTK_THEME "adw-gtk3-dark"
+
+    // =========================================================================
+    // 3. XWayland & Unified Cursor Synchronization
+    // =========================================================================
+    // Prevents the mouse cursor from randomly resizing or changing styles 
+    // when crossing borders between Flatpaks, XWayland, and native compositors.
+    XCURSOR_THEME "Adwaita"
+    XCURSOR_SIZE "24"
+
+    // =========================================================================
+    // 4. Toolkit Backend & Compositor Routing
+    // =========================================================================
+    GDK_BACKEND "wayland,x11"
+    CLUTTER_BACKEND "wayland"
+
+    // =========================================================================
+    // 5. Electron / Chromium Engine Acceleration
+    // =========================================================================
+    // Uses "auto" to prevent crashes in older Electron versions while still
+    // enforcing native, sharp Wayland rendering for Discord, VS Code, etc.
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+
+    // =========================================================================
+    // 6. QT Framework Ecosystem Handling
+    // =========================================================================
+    // Mandates native Wayland contexts for QT5/QT6 apps (VLC, OBS Studio, qBittorrent).
+    QT_QPA_PLATFORM "wayland;xcb"
+    // Forces QT applications to adopt your native GTK3 styling so everything looks uniform.
+    QT_QPA_PLATFORMTHEME "gtk3"
+
+    // =========================================================================
+    // 7. Non-Reparenting Abstract Window Toolkit Layouts (Java Fixes)
+    // =========================================================================
+    // Intercepts and corrects rendering engine assumptions for Java-based GUIs 
+    // preventing blank gray layout errors in standalone window managers.
+    _JAVA_AWT_WM_NONREPARENTING "1"
 }
 hotkey-overlay {
     skip-at-startup

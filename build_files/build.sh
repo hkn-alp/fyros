@@ -7,7 +7,6 @@ dnf5 -y copr enable avengemedia/dms
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable atim/starship
 dnf5 -y copr enable lihaohong/yazi
-dnf5 -y copr enable atim/himalaya
 
 ### 2. Purge Base Image Bloat
 # Ripping out the native versions so we can use Flatpaks or our preferred apps
@@ -19,14 +18,11 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     cliphist \
     ghostty \
     nautilus \
-    file-roller \
-    gnome-network-displays \
     network-manager-applet \
     cava \
     brightnessctl \
     playerctl \
     mate-polkit \
-    dcal \
     zsh \
     starship \
     zsh-autosuggestions \
@@ -36,7 +32,6 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     input-remapper \
     gnome-firmware \
     tailscale \
-    himalaya \
     grim \
     slurp \
     swappy \
@@ -54,10 +49,15 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     fzf \
     zoxide \
     ImageMagick \
+    adw-gtk3-theme \
+    xdg-desktop-portal-gtk \
+    xdg-desktop-portal-gnome \
+    papirus-icon-theme \
     dms \
     dms-greeter \
     dgop \
     dsearch \
+    dcal \
     matugen
 
 ### 5. Disable COPRs
@@ -66,10 +66,8 @@ dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable atim/starship
 dnf5 -y copr disable lihaohong/yazi
-dnf5 -y copr disable atim/himalaya
 
 ### 6. The Global Flatpak Installer
-
 mkdir -p /usr/lib/systemd/system/
 cat << 'EOF' > /usr/lib/systemd/system/flatpak-preinstall.service
 [Unit]
@@ -81,8 +79,13 @@ After=network-online.target
 Type=oneshot
 ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists valent https://valent.andyholmes.ca/valent.flatpakrepo
 ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-ExecStart=/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
-ExecStart=/usr/bin/flatpak install --system -y flathub dev.zed.Zed org.mozilla.firefox page.codeberg.bazaar.bazaar io.github.flattool.Warehouse com.github.tchx84.Flatseal org.gnome.Snapshot org.gnome.SoundRecorder org.gnome.TextEditor io.github.dvlv.boxbuddy org.gnome.Boxes io.gitlab.adhami3310.Impression org.gnome.World.PikaBackup org.gnome.baobab org.gnome.Connections
+
+# Attempt to install Valent independently
+ExecStartPre=-/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
+
+# Loop to install Flatpak Apps
+ExecStart=/bin/bash -c 'for app in dev.zed.Zed org.mozilla.firefox io.github.kolunmi.Bazaar io.github.flattool.Warehouse com.github.tchx84.Flatseal org.gnome.Snapshot org.gnome.SoundRecorder org.gnome.TextEditor com.ranfdev.DistroShelf org.gnome.Boxes io.gitlab.adhami3310.Impression org.gnome.World.PikaBackup org.kde.filelight org.gnome.Connections org.gnome.FileRoller org.gnome.NetworkDisplays io.github.hkdb.Aerion org.gnome.Loupe org.gnome.Showtime org.gnome.Papers org.gnome.Maps org.gnome.Calculator com.github.jeromerobert.pdfarranger com.github.xournalpp.xournalpp; do /usr/bin/flatpak install --system -y flathub "$app" || true; done'
+
 ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
 
 [Install]
@@ -113,23 +116,21 @@ echo "i2c-dev" > /usr/lib/modules-load.d/i2c.conf
 mkdir -p /etc/skel/.config
 cp -a /ctx/skel/.config/* /etc/skel/.config/ 2>/dev/null || true
 cp -a /ctx/skel/.[a-zA-Z0-9]* /etc/skel/ 2>/dev/null || true
+cp -a /ctx/skel/.var /etc/skel/ 2>/dev/null || true
 
 # Bake the DMS KDEConnect Plugin into the system skeleton
 echo "Fetching dankKDEConnect plugin..."
 mkdir -p /etc/skel/.config/DankMaterialShell/plugins
 JSON_URL="https://raw.githubusercontent.com/AvengeMedia/dms-plugin-registry/master/plugins/dank-kdeconnect.json"
 
-# Download and parse the JSON (Fixed keys: .repo and .path)
 PLUGIN_JSON=$(curl -sL "$JSON_URL")
 PLUGIN_REPO=$(echo "$PLUGIN_JSON" | jq -r '.repo')
 PLUGIN_PATH=$(echo "$PLUGIN_JSON" | jq -r '.path // empty')
 
-# Convert to full GitHub URL if the JSON only provides the username/repo format
 if [[ "$PLUGIN_REPO" != http* ]]; then
     PLUGIN_REPO="https://github.com/${PLUGIN_REPO}.git"
 fi
 
-# Safely extract the plugin (Handles both Dedicated Repos and Monorepos)
 if [[ -n "$PLUGIN_PATH" ]]; then
     echo "Monorepo detected. Extracting $PLUGIN_PATH..."
     git clone --depth 1 "$PLUGIN_REPO" /tmp/dms-plugin-repo
@@ -152,7 +153,6 @@ ConditionPathExists=!%h/.local/state/fyros-dotfiles-injected
 Type=oneshot
 ExecStartPre=/usr/bin/mkdir -p %h/.local/state
 ExecStart=/usr/bin/cp -rn /etc/skel/. %h/
-# Dynamically overwrite the placeholder with the user's real absolute path
 ExecStart=/usr/bin/sed -i "s|HOME_PLACEHOLDER|%h|g" %h/.config/DankMaterialShell/settings.json
 ExecStartPost=/usr/bin/touch %h/.local/state/fyros-dotfiles-injected
 
@@ -170,14 +170,29 @@ cat << 'EOF' > /etc/greetd/config.toml
 vt = 1
 
 [default_session]
-command = "dms-greeter --command niri"
+command = "/usr/bin/dms-greeter --command niri --cache-dir /var/cache/dms-greeter -C /etc/greetd/niri/config.kdl"
 user = "greetd"
 EOF
 
+# Move the pre-generated Mostar defaults into the immutable image's safe storage
+mkdir -p /usr/share/dms-greeter/
+cp /ctx/branding/greeter-defaults/session.json /usr/share/dms-greeter/default-session.json 2>/dev/null || true
+cp /ctx/branding/greeter-defaults/colors.json /usr/share/dms-greeter/default-colors.json 2>/dev/null || true
+cp /ctx/branding/greeter-defaults/settings.json /usr/share/dms-greeter/default-settings.json 2>/dev/null || true
+
+# Instruct systemd to copy defaults into the volatile cache and assert strict greetd ownership
 mkdir -p /usr/lib/tmpfiles.d
 cat << 'EOF' > /usr/lib/tmpfiles.d/greetd.conf
 d /var/lib/greetd 0755 greetd greetd - -
-d /var/cache/dms-greeter 0755 greetd greetd - -
+d /var/cache/dms-greeter 0775 greetd greeter - -
+d /var/cache/dms-greeter/.local/state 0775 greetd greeter - -
+
+C /var/cache/dms-greeter/session.json - - - - /usr/share/dms-greeter/default-session.json
+C /var/cache/dms-greeter/colors.json - - - - /usr/share/dms-greeter/default-colors.json
+C /var/cache/dms-greeter/settings.json - - - - /usr/share/dms-greeter/default-settings.json
+
+Z /var/cache/dms-greeter/ - greetd greeter - -
+Z /var/cache/dms-greeter/.local/ - greetd greeter - -
 EOF
 
 mkdir -p /usr/lib/systemd/system/greetd.service.d
@@ -220,6 +235,40 @@ rm -rf /usr/share/backgrounds/fedora-workstation 2>/dev/null || true
 mkdir -p /usr/share/backgrounds/fyros
 cp -a /ctx/wallpapers/* /usr/share/backgrounds/fyros/ 2>/dev/null || true
 
-### 13. Image Size Optimization
+### 13. Bake in the Fyros Welcome Screen (MOTD)
+mkdir -p /etc/profile.d/
+
+cat << 'EOF' > /etc/profile.d/fyros-motd.sh
+if [[ $- == *i* ]]; then
+    clear
+    
+    # Run fastfetch using the Kitty graphics protocol to render the actual PNG logo
+    fastfetch \
+        --logo /usr/share/pixmaps/fyros-logo.png \
+        --logo-type kitty \
+        --logo-width 28 \
+        --structure Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:WM:Terminal:CPU:GPU:Memory:Disk:LocalIP
+
+    echo -e "\e[1;31m=============================================================\e[0m"
+    echo -e " \e[1;37m🔥 Welcome to Fyros OS — Atomic Wayland Architecture 🔥\e[0m"
+    echo -e "\e[1;31m=============================================================\e[0m"
+    echo -e " \e[1;36m📖 Documentation:\e[0m https://github.com/hkn-alp/fyros"
+    echo -e " \e[1;36m🐛 Bug Reports:\e[0m   https://github.com/hkn-alp/fyros/issues"
+    echo -e " \e[1;36m📦 Updates:\e[0m       Run \e[1;32msudo bootc upgrade\e[0m to fetch new layers."
+    echo -e "\e[1;31m-------------------------------------------------------------\e[0m"
+    echo -e " \e[1;33m💡 Quick Tip:\e[0m Press \e[1;37mSUPER + SHIFT + /\e[0m to view the dynamic"
+    echo -e "               Niri keybind overlay at any time."
+    echo -e "\e[1;31m=============================================================\e[0m"
+    echo ""
+fi
+EOF
+
+chmod +x /etc/profile.d/fyros-motd.sh
+
+### 14. GUI Cleanups
+# Remove Himalaya's desktop file so it doesn't clutter the graphical launcher with broken icons
+rm -f /usr/share/applications/himalaya.desktop 2>/dev/null || true
+
+### 15. Image Size Optimization
 dnf5 clean all
 rm -rf /var/cache/* /tmp/*
