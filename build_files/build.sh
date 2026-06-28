@@ -58,7 +58,8 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     dgop \
     dsearch \
     dcal \
-    matugen
+    matugen \
+    xdg-user-dirs
     
 # Install Qt Wayland and Theming backends
 dnf5 install -y --setopt=install_weak_deps=False \
@@ -164,6 +165,7 @@ Type=oneshot
 ExecStartPre=/usr/bin/mkdir -p %h/.local/state
 ExecStart=/usr/bin/cp -rn /etc/skel/. %h/
 ExecStart=/usr/bin/sed -i "s|HOME_PLACEHOLDER|%h|g" %h/.config/DankMaterialShell/settings.json
+ExecStartPost=/usr/bin/xdg-user-dirs-update
 ExecStartPost=/usr/bin/touch %h/.local/state/fyros-dotfiles-injected
 
 [Install]
@@ -184,7 +186,51 @@ command = "/usr/bin/dms-greeter --command niri --cache-dir /var/cache/dms-greete
 user = "greetd"
 EOF
 
-# Move the pre-generated Mostar defaults into the immutable image's safe storage
+# Bake the Niri configurations needed specifically for the login screen
+mkdir -p /etc/greetd/niri
+
+cat << 'EOF' > /etc/greetd/niri/config.kdl
+hotkey-overlay {
+    skip-at-startup
+}
+
+environment {
+    DMS_RUN_GREETER "1"
+}
+
+gestures {
+    hot-corners {
+        off
+    }
+}
+
+layout {
+    background-color "#000000"
+}
+
+include "/etc/greetd/niri/dms.kdl"
+EOF
+
+cat << 'EOF' > /etc/greetd/niri/dms.kdl
+input {
+    keyboard {
+        xkb
+        numlock
+    }
+    touchpad {
+        tap
+        natural-scroll
+    }
+    mouse
+    trackpoint
+}
+
+debug {
+    honor-xdg-activation-with-invalid-serial
+}
+EOF
+
+# Move the pre-generated defaults into the immutable image's safe storage
 mkdir -p /usr/share/dms-greeter/
 cp /ctx/branding/greeter-defaults/session.json /usr/share/dms-greeter/default-session.json 2>/dev/null || true
 cp /ctx/branding/greeter-defaults/colors.json /usr/share/dms-greeter/default-colors.json 2>/dev/null || true
