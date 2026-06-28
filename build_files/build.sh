@@ -59,7 +59,8 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     dsearch \
     dcal \
     matugen \
-    xdg-user-dirs
+    xdg-user-dirs \
+    fastfetch
     
 # Install Qt Wayland and Theming backends
 dnf5 install -y --setopt=install_weak_deps=False \
