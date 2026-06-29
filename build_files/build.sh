@@ -22,7 +22,6 @@ dnf5 install -y --allowerasing --exclude=alacritty \
     cava \
     brightnessctl \
     playerctl \
-    mate-polkit \
     zsh \
     starship \
     zsh-autosuggestions \

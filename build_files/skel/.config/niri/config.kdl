@@ -3,7 +3,6 @@
 // Check the wiki for a full description of the configuration:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
 
-spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
 // Import the SSH environment into systemd and launch Valent silently in the background
 spawn-at-startup "systemctl" "--user" "import-environment" "SSH_AUTH_SOCK"
 spawn-at-startup "flatpak" "run" "ca.andyholmes.Valent" "--gapplication-service"
@@ -174,7 +173,7 @@ environment {
     // =========================================================================
     // 2. Legacy Toolkit & UI Theme Alignment
     // =========================================================================
-    // Forces older GTK3 apps (like mate-polkit) to adopt dark mode assets.
+    // Forces older GTK3 apps to adopt dark mode assets.
     GTK_THEME "adw-gtk3-dark"
 
     // =========================================================================
