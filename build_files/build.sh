@@ -96,7 +96,7 @@ ExecStartPre=/usr/bin/flatpak remote-add --system --if-not-exists flathub https:
 ExecStartPre=-/usr/bin/flatpak install --system -y valent ca.andyholmes.Valent
 
 # Loop to install Flatpak Apps
-ExecStart=/bin/bash -c 'for app in dev.zed.Zed org.mozilla.firefox io.github.kolunmi.Bazaar io.github.flattool.Warehouse com.github.tchx84.Flatseal org.gnome.Snapshot org.gnome.SoundRecorder org.gnome.TextEditor com.ranfdev.DistroShelf org.gnome.Boxes io.gitlab.adhami3310.Impression org.gnome.World.PikaBackup org.kde.filelight org.gnome.Connections org.gnome.FileRoller org.gnome.NetworkDisplays io.github.hkdb.Aerion org.gnome.Loupe org.gnome.Showtime org.gnome.Papers org.gnome.Maps org.gnome.Calculator com.github.jeromerobert.pdfarranger com.github.xournalpp.xournalpp; do /usr/bin/flatpak install --system -y flathub "$app" || true; done'
+ExecStart=/bin/bash -c 'for app in dev.zed.Zed org.mozilla.firefox io.github.kolunmi.Bazaar io.github.flattool.Warehouse com.github.tchx84.Flatseal org.gnome.Snapshot org.gnome.SoundRecorder org.gnome.TextEditor com.ranfdev.DistroShelf org.gnome.Boxes io.gitlab.adhami3310.Impression org.gnome.World.PikaBackup org.gnome.baobab org.gnome.Connections org.gnome.FileRoller org.gnome.NetworkDisplays io.github.hkdb.Aerion org.gnome.Loupe org.gnome.Showtime org.gnome.Papers org.gnome.Maps org.gnome.Calculator com.github.jeromerobert.pdfarranger com.github.xournalpp.xournalpp; do /usr/bin/flatpak install --system -y flathub "$app" || true; done'
 
 ExecStartPost=/usr/bin/systemctl disable flatpak-preinstall.service
 
